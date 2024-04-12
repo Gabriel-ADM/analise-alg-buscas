@@ -1,7 +1,9 @@
 mod helpers;
 mod algorithms;
-use std::env;
+use std::any::{type_name_of_val, Any};
+use std::{ env, fs };
 use std::time::Instant;
+use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
 use helpers::*;
@@ -86,4 +88,6 @@ fn main() {
         generate_keys(&q, 4);
         exec_algms(n, q, true);
     }
+
+    process_result();
 }

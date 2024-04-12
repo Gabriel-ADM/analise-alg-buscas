@@ -3,7 +3,7 @@ pub fn busca_sequencial(data: &Vec<i32>, element: i32) -> isize {
         if value == element {
             return index as isize;
         }
-    }
+    } 
     return -1;
 }
 

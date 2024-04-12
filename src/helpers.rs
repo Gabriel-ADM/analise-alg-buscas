@@ -1,5 +1,5 @@
 use std::io::prelude::*;
-use std::fs::File;
+use std::fs::*;
 use std::io::BufReader;
 use rand::Rng;
 use std::time::{ Duration, Instant };
@@ -47,10 +47,52 @@ pub fn read_data(file_path: &str) -> Vec<i32> {
 }
 
 pub fn measure_execution_time<F, R>(closure: F) -> Duration where F: FnOnce() -> R {
-    let start_time = Instant::now(); // Get the current time before executing the closure
-    let result = closure(); // Execute the closure
-    let _aux = result;
-    let duration = start_time.elapsed(); // Calculate the duration of execution
+    let start_time = Instant::now();
+    let result: R = closure();
+    let _aux: R = result;
+    let duration: Duration = start_time.elapsed();
 
-    duration // Return the duration in microseconds
+    duration
+}
+
+pub fn process_result() {
+    let result_files = read_dir(r"src\results").unwrap();
+    for file in result_files {
+        let file_path = file.unwrap().path();
+        let file_name = file_path.display().to_string();
+
+        if let Ok(mut file) = File::open(&file_path) {
+            let mut contents = String::new();
+            if file.read_to_string(&mut contents).is_ok() {
+                println!("Name: {}", file_name);
+                // println!("Content: \n{}", contents);
+                let mut values: Vec<f32> = Vec::new();
+
+                let file = File::open(file_path).expect("Failed to get file");
+                let buf_reader = BufReader::new(file);
+                let mut data: Vec<(String, f32)> = Vec::new();
+
+                for line in buf_reader.lines() {
+                    let line = line.expect("Error getting line");
+                    if let Some((alg_str, exec_str)) = line.split_once(";") {
+                        let (alg, exec_time): (String, f32) = (
+                            alg_str.to_string(),
+                            exec_str
+                                .replace(";", "")
+                                .parse::<f32>()
+                                .unwrap_or_else(|_| panic!("Failed to parse the number")),
+                        );
+                        data.push((alg, exec_time));
+                        // println!("{:?}", data);
+                    } else {
+                        println!("Error trying to process csv line");
+                    };
+                }
+            } else {
+                eprintln!("Failed to read file: {}", file_name);
+            }
+        } else {
+            eprintln!("Failed to open file: {}", file_name);
+        }
+    }
 }
