@@ -1,16 +1,14 @@
 mod helpers;
 mod algorithms;
-use std::any::{type_name_of_val, Any};
-use std::{ env, fs };
+use std::env;
 use std::time::Instant;
-use std::io::BufReader;
 use std::fs::File;
 use std::io::prelude::*;
 use helpers::*;
 use algorithms::*;
 
 fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
-    for (index, &_q_size) in q.iter().enumerate() {
+    for (index, _q_size) in q.iter().enumerate() {
         let data_path = format!(r"src\data\data_ten_to_{}.txt", index + 4);
         let mut data = read_data(&data_path);
 
@@ -20,7 +18,7 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
             res_data = format!(r"src\results\optm_exec_10_to_{:?}.csv", index + 4);
         } else {
             keys_path = format!(r"src\data\keys_ten_to_{}.txt", index + 2);
-            res_data = format!(r"src\results\exec_10_to_{:?}.csv", index + 4);
+            res_data = format!(r"src\results\exec_10_to_{:?}.csv", index + 2);
         }
 
         let keys = read_data(&keys_path);

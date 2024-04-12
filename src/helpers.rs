@@ -55,6 +55,17 @@ pub fn measure_execution_time<F, R>(closure: F) -> Duration where F: FnOnce() ->
     duration
 }
 
+fn alg_process_string(alg: &str, mut execs: Vec<f32>) -> String {
+    execs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let mut bsc_avg: f32 = execs.iter().sum();
+    bsc_avg = bsc_avg / (execs.len() as f32);
+    let bsc_med = Some(execs[execs.len() / 2 - 1] + (execs[execs.len() / 2] as f32) / 2.0).expect(
+        "Error getting median of given data"
+    );
+
+    return format!("{};media;{};mediana;{};", alg, bsc_avg, bsc_med).to_string();
+}
+
 pub fn process_result() {
     let result_files = read_dir(r"src\results").unwrap();
     for file in result_files {
@@ -64,12 +75,9 @@ pub fn process_result() {
         if let Ok(mut file) = File::open(&file_path) {
             let mut contents = String::new();
             if file.read_to_string(&mut contents).is_ok() {
-                println!("Name: {}", file_name);
-                // println!("Content: \n{}", contents);
-                let mut values: Vec<f32> = Vec::new();
-
                 let file = File::open(file_path).expect("Failed to get file");
                 let buf_reader = BufReader::new(file);
+                // Armazena resultados de tempo de execucao localmente
                 let mut data: Vec<(String, f32)> = Vec::new();
 
                 for line in buf_reader.lines() {
@@ -83,11 +91,49 @@ pub fn process_result() {
                                 .unwrap_or_else(|_| panic!("Failed to parse the number")),
                         );
                         data.push((alg, exec_time));
-                        // println!("{:?}", data);
                     } else {
                         println!("Error trying to process csv line");
                     };
                 }
+
+                // Calcula moda media e mediana
+                let (mut bsc_execs, mut bco_execs, mut bbs_execs, mut bbr_execs): (
+                    Vec<f32>,
+                    Vec<f32>,
+                    Vec<f32>,
+                    Vec<f32>,
+                ) = (Vec::new(), Vec::new(), Vec::new(), Vec::new());
+                let sort_time = data
+                    .iter()
+                    .find(|exe| exe.0 == "Sort_Time")
+                    .map(|exe| exe.1)
+                    .expect(&format!("Error to get sorting time. File: {:?}", file_name));
+
+                for exec in &data {
+                    if exec.0 == "BSC" {
+                        bsc_execs.push(exec.1);
+                    } else if exec.0 == "BCO" {
+                        bco_execs.push(exec.1 + sort_time);
+                    } else if exec.0 == "BBS" {
+                        bbs_execs.push(exec.1 + sort_time);
+                    } else if exec.0 == "BBR" {
+                        bbr_execs.push(exec.1 + sort_time);
+                    }
+                }
+                let final_result = format!(
+                    "{}\n{}\n{}\n{}\nSort_time;{}\n",
+                    alg_process_string("BSC", bsc_execs),
+                    alg_process_string("BCO", bco_execs),
+                    alg_process_string("BBS", bbs_execs),
+                    alg_process_string("BBR", bbr_execs),
+                    sort_time
+                );
+                let mut result_file: File = File::create(
+                    &format!(r"src\data\analysis\{}", file_name)
+                ).expect("Failed to create file");
+                result_file
+                    .write_all(&format!("{}, ", final_result).as_bytes())
+                    .expect("Failed to write to file");
             } else {
                 eprintln!("Failed to read file: {}", file_name);
             }
