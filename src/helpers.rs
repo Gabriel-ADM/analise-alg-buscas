@@ -70,7 +70,9 @@ pub fn process_result() {
     let result_files = read_dir(r"src\results").unwrap();
     for file in result_files {
         let file_path = file.unwrap().path();
-        let file_name = file_path.display().to_string();
+        // println!("{:?}", file_path.file_name().expect("Error getting file name"));
+        let mut file_name = format!("{:?}", file_path.file_name().expect("Error getting file name"));
+        file_name = file_name.trim_matches('"').trim_matches('\\').to_string();
 
         if let Ok(mut file) = File::open(&file_path) {
             let mut contents = String::new();
@@ -129,16 +131,16 @@ pub fn process_result() {
                     sort_time
                 );
                 let mut result_file: File = File::create(
-                    &format!(r"src\data\analysis\{}", file_name)
+                    &format!(r"src\analysis\{}", file_name)
                 ).expect("Failed to create file");
                 result_file
-                    .write_all(&format!("{}, ", final_result).as_bytes())
+                    .write_all(&format!("{}", final_result).as_bytes())
                     .expect("Failed to write to file");
             } else {
-                eprintln!("Failed to read file: {}", file_name);
+                eprintln!("Failed to read file: {:?}", file_name);
             }
         } else {
-            eprintln!("Failed to open file: {}", file_name);
+            eprintln!("Failed to open file: {:?}", file_name);
         }
     }
 }
