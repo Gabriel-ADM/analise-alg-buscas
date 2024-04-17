@@ -63,7 +63,7 @@ fn alg_process_string(alg: &str, mut execs: Vec<f32>) -> String {
         "Error getting median of given data"
     );
 
-    return format!("{};media;{};mediana;{};", alg, bsc_avg, bsc_med).to_string();
+    return format!("{};{};{};", alg, bsc_avg, bsc_med).to_string();
 }
 
 pub fn process_result() {
