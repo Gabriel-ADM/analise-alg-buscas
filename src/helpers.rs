@@ -71,7 +71,10 @@ pub fn process_result() {
     for file in result_files {
         let file_path = file.unwrap().path();
         // println!("{:?}", file_path.file_name().expect("Error getting file name"));
-        let mut file_name = format!("{:?}", file_path.file_name().expect("Error getting file name"));
+        let mut file_name = format!(
+            "{:?}",
+            file_path.file_name().expect("Error getting file name")
+        );
         file_name = file_name.trim_matches('"').trim_matches('\\').to_string();
 
         if let Ok(mut file) = File::open(&file_path) {
@@ -115,11 +118,11 @@ pub fn process_result() {
                     if exec.0 == "BSC" {
                         bsc_execs.push(exec.1);
                     } else if exec.0 == "BCO" {
-                        bco_execs.push(exec.1);
+                        bco_execs.push(exec.1 + sort_time);
                     } else if exec.0 == "BBS" {
-                        bbs_execs.push(exec.1);
+                        bbs_execs.push(exec.1 + sort_time);
                     } else if exec.0 == "BBR" {
-                        bbr_execs.push(exec.1);
+                        bbr_execs.push(exec.1 + sort_time);
                     }
                 }
                 let final_result = format!(
