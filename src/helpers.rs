@@ -115,15 +115,15 @@ pub fn process_result() {
                     if exec.0 == "BSC" {
                         bsc_execs.push(exec.1);
                     } else if exec.0 == "BCO" {
-                        bco_execs.push(exec.1 + sort_time);
+                        bco_execs.push(exec.1);
                     } else if exec.0 == "BBS" {
-                        bbs_execs.push(exec.1 + sort_time);
+                        bbs_execs.push(exec.1);
                     } else if exec.0 == "BBR" {
-                        bbr_execs.push(exec.1 + sort_time);
+                        bbr_execs.push(exec.1);
                     }
                 }
                 let final_result = format!(
-                    "{}\n{}\n{}\n{}\nSort_time;{}\n",
+                    "{}\n{}\n{}\n{}\nSort_time;{};\n",
                     alg_process_string("BSC", bsc_execs),
                     alg_process_string("BCO", bco_execs),
                     alg_process_string("BBS", bbs_execs),

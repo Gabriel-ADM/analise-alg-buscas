@@ -15,7 +15,7 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
         let (keys_path, res_data): (String, String);
         if optimized {
             keys_path = format!(r"src\data\keys_ten_to_{}.txt", index + 4);
-            res_data = format!(r"src\results\optm_exec_10_to_{:?}.csv", index + 4);
+            res_data = format!(r"src\results\qcksrt_optm_exec_10_to_{:?}.csv", index + 4);
         } else {
             keys_path = format!(r"src\data\keys_ten_to_{}.txt", index + 2);
             res_data = format!(r"src\results\exec_10_to_{:?}.csv", index + 2);
@@ -35,7 +35,7 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
         }
 
         let start_sort_time = Instant::now();
-        data.sort();
+        data.sort_unstable();
         let end_sort_time = Instant::now();
         let sort_duration = end_sort_time.duration_since(start_sort_time);
         res_data
@@ -67,14 +67,14 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
 
 fn main() {
     let n = vec![10000, 100000, 1000000, 10000000];
-    let q;
     let args: Vec<String> = env::args().collect();
-
+    
     if args.len() >= 2 && args[1] == "generate-data" {
         println!("Generating data...");
         generate_data(&n);
     }
-
+    
+    let q;
     if cfg!(debug_assertions) {
         println!("Running unoptimized compilation");
         q = vec![100, 1000, 10000, 100000];
@@ -82,7 +82,9 @@ fn main() {
         exec_algms(n, q, false);
     } else {
         println!("Running optimized compilation");
-        q = vec![10000, 100000, 1000000, 10000000];
+        q = vec![
+            10000, 100000, 1000000, 
+            10000000];
         generate_keys(&q, 4);
         exec_algms(n, q, true);
     }
