@@ -34,15 +34,15 @@ pub fn busca_binaria(data: &Vec<i32>, element: i32) -> isize {
     return -1;
 }
 
-pub fn busca_binaria_recursiva(data: &Vec<i32>, element: i32, start: usize, end: usize) -> isize {
-    if start >= end {
+pub fn busca_binaria_recursiva(data: &Vec<i32>, element: i32, start: isize, end: isize) -> isize {
+    if start > end {
         return -1;
     }
-    let mid: usize = (start + end) / 2;
-    if data[mid] == element {
-        return mid as isize;
-    } else if data[mid] > element {
-        return busca_binaria_recursiva(data, element, start, mid);
+    let mid = (start + end) / 2;
+    if data[mid as usize] == element {
+        return mid;
+    } else if data[mid as usize] > element {
+        return busca_binaria_recursiva(data, element, start, mid-1);
     } else {
         return busca_binaria_recursiva(data, element, mid + 1, end);
     }

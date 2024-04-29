@@ -1,7 +1,7 @@
 mod helpers;
 mod algorithms;
 use std::env;
-use std::time::Instant;
+use std::time::{ Duration, Instant };
 use std::fs::File;
 use std::io::prelude::*;
 use helpers::*;
@@ -26,38 +26,45 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
             "Failed to create file, perhaps run it using generate-data"
         );
 
+        let mut bsc_accumulated = Duration::new(0, 0);
+        let (mut bco_accumulated, mut bbs_accumulated, mut bbr_accumulated) = (
+            bsc_accumulated,
+            bsc_accumulated,
+            bsc_accumulated,
+        );
         for &key in keys.iter() {
-            let bsc_benchmark = measure_execution_time(|| busca_sequencial(&data, key));
-            println!("BSC: {:?}", bsc_benchmark);
-            res_data
-                .write(format!("BSC;{:.10};\n", bsc_benchmark.as_secs_f64() * 1000.0).as_bytes())
-                .expect("Failed to write to file");
+            bsc_accumulated += measure_execution_time(|| busca_sequencial(&data, key));
         }
+        res_data
+            .write(format!("BSC;{:.10};\n", bsc_accumulated.as_secs_f64() * 1000.0).as_bytes())
+            .expect("Failed to write to file");
 
-        let start_sort_time = Instant::now();
+        let start_sort_time: Instant = Instant::now();
         data.sort_unstable();
-        let end_sort_time = Instant::now();
+        let end_sort_time: Instant = Instant::now();
         let sort_duration = end_sort_time.duration_since(start_sort_time);
+        bco_accumulated += sort_duration;
+        bbs_accumulated += sort_duration;
+        bbr_accumulated += sort_duration;
         res_data
             .write(format!("Sort_Time;{:.10};\n", sort_duration.as_secs_f64() * 1000.0).as_bytes())
             .expect("Error inserting sorting time");
 
         for &key in keys.iter() {
-            let bco_benchmark = measure_execution_time(|| busca_sequencial_otimizada(&data, key));
-            println!("BCO: {:?}", bco_benchmark);
-            let bbs_benchmark = measure_execution_time(|| busca_binaria(&data, key));
-            println!("BBS: {:?}", bbs_benchmark);
-            let bbr_benchmark = measure_execution_time(||
-                busca_binaria_recursiva(&data, key, 0, data.len() - 1)
+            bco_accumulated += measure_execution_time(|| busca_sequencial_otimizada(&data, key));
+            bbs_accumulated += measure_execution_time(|| busca_binaria(&data, key));
+            bbr_accumulated += measure_execution_time(||
+                busca_binaria_recursiva(&data, key, 0, (data.len() - 1) as isize)
             );
-            println!("BBR: {:?}", bbr_benchmark);
             res_data
                 .write(
                     format!(
-                        "BCO;{:.10};\nBBS;{:.10};\nBBR;{:.10};\n",
-                        bco_benchmark.as_secs_f64() * 1000.0,
-                        bbs_benchmark.as_secs_f64() * 1000.0,
-                        bbr_benchmark.as_secs_f64() * 1000.0
+                        "BSC;{:.10};\nBCO;{:.10};\nBBS;{:.10};\nBBR;{:.10};\nSort_Time;{:.10};",
+                        bsc_accumulated.as_secs_f64() * 1000.0,
+                        bco_accumulated.as_secs_f64() * 1000.0,
+                        bbs_accumulated.as_secs_f64() * 1000.0,
+                        bbr_accumulated.as_secs_f64() * 1000.0,
+                        sort_duration.as_secs_f64() * 1000.0
                     ).as_bytes()
                 )
                 .expect("Failed to write to file");
@@ -68,12 +75,12 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
 fn main() {
     let n = vec![10000, 100000, 1000000, 10000000];
     let args: Vec<String> = env::args().collect();
-    
+
     if args.len() >= 2 && args[1] == "generate-data" {
         println!("Generating data...");
         generate_data(&n);
     }
-    
+
     let q;
     if cfg!(debug_assertions) {
         println!("Running unoptimized compilation");
@@ -82,9 +89,7 @@ fn main() {
         exec_algms(n, q, false);
     } else {
         println!("Running optimized compilation");
-        q = vec![
-            10000, 100000, 1000000, 
-            10000000];
+        q = vec![10000, 100000, 1000000, 10000000];
         generate_keys(&q, 4);
         exec_algms(n, q, true);
     }
