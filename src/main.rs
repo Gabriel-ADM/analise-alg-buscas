@@ -88,5 +88,5 @@ fn main() {
         exec_algms(n, q, true);
     }
 
-    process_result();
+    // process_result();
 }

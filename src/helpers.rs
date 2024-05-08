@@ -55,7 +55,7 @@ pub fn measure_execution_time<F, R>(closure: F) -> Duration where F: FnOnce() ->
     duration
 }
 
-fn alg_process_string(alg: &str, mut execs: Vec<f32>) -> String {
+fn _alg_process_string(alg: &str, mut execs: Vec<f32>) -> String {
     execs.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mut bsc_avg: f32 = execs.iter().sum();
     bsc_avg = bsc_avg / (execs.len() as f32);
@@ -66,7 +66,7 @@ fn alg_process_string(alg: &str, mut execs: Vec<f32>) -> String {
     return format!("{};{};{};", alg, bsc_avg, bsc_med).to_string();
 }
 
-pub fn process_result() {
+pub fn _process_result() {
     let result_files = read_dir(r"src\results").unwrap();
     for file in result_files {
         let file_path = file.unwrap().path();
@@ -127,10 +127,10 @@ pub fn process_result() {
                 }
                 let final_result = format!(
                     "{}\n{}\n{}\n{}\nSort_time;{};\n",
-                    alg_process_string("BSC", bsc_execs),
-                    alg_process_string("BCO", bco_execs),
-                    alg_process_string("BBS", bbs_execs),
-                    alg_process_string("BBR", bbr_execs),
+                    _alg_process_string("BSC", bsc_execs),
+                    _alg_process_string("BCO", bco_execs),
+                    _alg_process_string("BBS", bbs_execs),
+                    _alg_process_string("BBR", bbr_execs),
                     sort_time
                 );
                 let mut result_file: File = File::create(
