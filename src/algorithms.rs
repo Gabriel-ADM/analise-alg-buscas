@@ -38,7 +38,10 @@ pub fn busca_binaria_recursiva(data: &Vec<i32>, element: i32, start: isize, end:
     if start > end {
         return -1;
     }
-    let mid = (start + end) / 2;
+    let mid = start + (end - start) / 2;
+    if mid < 0 || mid as usize >= data.len() {
+        return -1;
+    }
     if data[mid as usize] == element {
         return mid;
     } else if data[mid as usize] > element {

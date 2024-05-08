@@ -28,16 +28,13 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
 
         let mut bsc_accumulated = Duration::new(0, 0);
         let (mut bco_accumulated, mut bbs_accumulated, mut bbr_accumulated) = (
-            bsc_accumulated,
-            bsc_accumulated,
-            bsc_accumulated,
+            Duration::new(0, 0),
+            Duration::new(0, 0),
+            Duration::new(0, 0),
         );
         for &key in keys.iter() {
             bsc_accumulated += measure_execution_time(|| busca_sequencial(&data, key));
         }
-        res_data
-            .write(format!("BSC;{:.10};\n", bsc_accumulated.as_secs_f64() * 1000.0).as_bytes())
-            .expect("Failed to write to file");
 
         let start_sort_time: Instant = Instant::now();
         data.sort_unstable();
@@ -46,9 +43,6 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
         bco_accumulated += sort_duration;
         bbs_accumulated += sort_duration;
         bbr_accumulated += sort_duration;
-        res_data
-            .write(format!("Sort_Time;{:.10};\n", sort_duration.as_secs_f64() * 1000.0).as_bytes())
-            .expect("Error inserting sorting time");
 
         for &key in keys.iter() {
             bco_accumulated += measure_execution_time(|| busca_sequencial_otimizada(&data, key));
@@ -56,19 +50,19 @@ fn exec_algms(_n: Vec<i32>, q: Vec<i32>, optimized: bool) {
             bbr_accumulated += measure_execution_time(||
                 busca_binaria_recursiva(&data, key, 0, (data.len() - 1) as isize)
             );
-            res_data
-                .write(
-                    format!(
-                        "BSC;{:.10};\nBCO;{:.10};\nBBS;{:.10};\nBBR;{:.10};\nSort_Time;{:.10};",
-                        bsc_accumulated.as_secs_f64() * 1000.0,
-                        bco_accumulated.as_secs_f64() * 1000.0,
-                        bbs_accumulated.as_secs_f64() * 1000.0,
-                        bbr_accumulated.as_secs_f64() * 1000.0,
-                        sort_duration.as_secs_f64() * 1000.0
-                    ).as_bytes()
-                )
-                .expect("Failed to write to file");
         }
+        res_data
+            .write(
+                format!(
+                    "BSC;{:?};\nBCO;{:?};\nBBS;{:?};\nBBR;{:?};\nSort_Time;{:?};\n",
+                    bsc_accumulated,
+                    bco_accumulated,
+                    bbs_accumulated,
+                    bbr_accumulated,
+                    sort_duration
+                ).as_bytes()
+            )
+            .expect("Failed to write to file");
     }
 }
 
